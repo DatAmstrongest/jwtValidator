@@ -4,9 +4,7 @@ import com.kocmetehan.jwtValidator.response.JWTResponse;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.crypto.RSASSAVerifier;
 import com.nimbusds.jwt.SignedJWT;
-import org.apache.tomcat.websocket.AsyncChannelWrapperSecure;
 import org.springframework.stereotype.Service;
-import tools.jackson.databind.ObjectMapper;
 
 import java.io.ByteArrayInputStream;
 import java.net.URI;
@@ -17,9 +15,7 @@ import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.security.interfaces.RSAPublicKey;
 import java.time.Duration;
-import java.util.Base64;
 import java.util.Date;
-import java.util.Map;
 
 @Service
 public class TokenValidationService {
