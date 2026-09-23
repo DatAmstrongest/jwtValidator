@@ -1,6 +1,7 @@
 package com.kocmetehan.jwtValidator.service;
 
 import com.kocmetehan.jwtValidator.response.JWTResponse;
+import com.nimbusds.jose.JOSEObjectType;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.crypto.RSASSAVerifier;
 import com.nimbusds.jwt.SignedJWT;
@@ -33,30 +34,36 @@ public class TokenValidationService {
         try {
             SignedJWT signedJWT = SignedJWT.parse(token);
 
-            // 1. Validate Algorithm
+            // 1. Validate Type (typ)
+            JOSEObjectType typ = signedJWT.getHeader().getType();
+            if (typ == null || !"JWT".equalsIgnoreCase(typ.getType())) {
+                return new JWTResponse(false, "Invalid or missing token type. Expected 'JWT'.");
+            }
+
+            // 2. Validate Algorithm
             if (!JWSAlgorithm.RS256.equals(signedJWT.getHeader().getAlgorithm())) {
                 return new JWTResponse(false, "Invalid algorithm. Only RS256 is supported.");
             }
 
-            // 2. Validate x5u
+            // 3. Validate x5u
             URI x5u = signedJWT.getHeader().getX509CertURL();
             if (x5u == null) {
                 return new JWTResponse(false, "Missing 'x5u' header parameter.");
             }
 
-            // 3. Fetch & Parse X.509 Certificate
+            // 4. Fetch & Parse X.509 Certificate
             X509Certificate certificate = fetchCertificate(x5u);
             if (!(certificate.getPublicKey() instanceof RSAPublicKey rsaPublicKey)) {
                 return new JWTResponse(false, "Certificate does not contain an RSA public key.");
             }
 
-            // 4. Verify Signature
+            // 5. Verify Signature
             RSASSAVerifier verifier = new RSASSAVerifier(rsaPublicKey);
             if (!signedJWT.verify(verifier)) {
                 return new JWTResponse(false, "Signature verification failed.");
             }
 
-            // 5. Verify Claims (iat & exp)
+            // 6. Verify Claims (iat & exp)
             Date now = new Date();
             Date exp = signedJWT.getJWTClaimsSet().getExpirationTime();
             Date iat = signedJWT.getJWTClaimsSet().getIssueTime();
