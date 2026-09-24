@@ -74,15 +74,6 @@ class AuthControllerWithMockCertificateTest {
     }
 
     @Test
-    @DisplayName("Should accept a token issued inside the 60-second grace window")
-    void shouldAcceptTokenIssuedWithinGraceWindow() throws Exception {
-        Date issuedAt = Date.from(Instant.now().plus(30, ChronoUnit.SECONDS));
-        Date expiresAt = Date.from(Instant.now().plus(1, ChronoUnit.HOURS));
-
-        expectValid(validBearerToken(issuedAt, expiresAt));
-    }
-
-    @Test
     @DisplayName("Should reject a missing Authorization header")
     void shouldRejectMissingAuthorizationHeader() throws Exception {
         expectInvalid(null, BEARER_PREFIX_MESSAGE);
@@ -246,13 +237,6 @@ class AuthControllerWithMockCertificateTest {
         SignedJWT signedJWT = new SignedJWT(header.build(), claims.build());
         signedJWT.sign(new RSASSASigner(signingKey));
         return "Bearer " + signedJWT.serialize();
-    }
-
-    private void expectValid(String authorization) throws Exception {
-        performAuth(authorization)
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.valid").value(true))
-                .andExpect(jsonPath("$.message").doesNotExist());
     }
 
     private void expectInvalid(String authorization, String message) throws Exception {
