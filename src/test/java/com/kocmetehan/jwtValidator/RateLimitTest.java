@@ -25,5 +25,11 @@ class RateLimitTest {
 
         mockMvc.perform(get("/auth"))
                 .andExpect(status().isTooManyRequests());
+
+        mockMvc.perform(get("/auth").with(request -> {
+                    request.setRemoteAddr("10.0.0.2");
+                    return request;
+                }))
+                .andExpect(status().isBadRequest());
     }
 }
