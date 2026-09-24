@@ -4,6 +4,8 @@ import com.kocmetehan.jwtValidator.response.JWTResponse;
 import com.kocmetehan.jwtValidator.service.TokenValidationService;
 import io.github.bucket4j.Bandwidth;
 import io.github.bucket4j.Bucket;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,6 +17,8 @@ import java.time.Duration;
 
 @RestController
 public class JWTController {
+
+    private static final Logger log = LoggerFactory.getLogger(JWTController.class);
 
     private final TokenValidationService tokenValidationService;
 
@@ -32,6 +36,7 @@ public class JWTController {
         this.bucket = Bucket.builder()
                 .addLimit(limit)
                 .build();
+        log.info("Rate limit configured at {} requests per minute", requestPerMinute);
     }
     // It authenticates given JWT token in Authorization part of the header
     @GetMapping("/auth")
@@ -39,11 +44,14 @@ public class JWTController {
         if (bucket.tryConsume(1)){
             JWTResponse response = tokenValidationService.validateToken(authHeader);
             if (response.getMessage() != null) {
+                log.warn("Authentication rejected: {}", response.getMessage());
                 return ResponseEntity.badRequest().body(response);
             }
+            log.info("Authentication succeeded");
             return ResponseEntity.ok(response);
         }
         else{
+            log.warn("Rate limit exceeded");
             return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).build();
         }
     }

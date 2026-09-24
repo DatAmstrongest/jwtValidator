@@ -8,6 +8,8 @@ import org.bouncycastle.cert.jcajce.JcaX509v3CertificateBuilder;
 import org.bouncycastle.openssl.jcajce.JcaPEMWriter;
 import org.bouncycastle.operator.ContentSigner;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -31,6 +33,8 @@ import java.util.Date;
 @RestController
 @RequestMapping("/api/mock")
 public class CertificateMockController {
+
+    private static final Logger log = LoggerFactory.getLogger(CertificateMockController.class);
 
     private byte[] cachedCertificateBytes;
     private PrivateKey privateKey; // Kept in memory if you want to sign tokens from the app
@@ -85,16 +89,16 @@ public class CertificateMockController {
                 pemWriter.writeObject(privateKey);
             }
 
-            System.out.println("Generated and saved mock certificates to: " + dir.toAbsolutePath());
+            log.info("Saved mock certificates to {}", dir.toAbsolutePath());
         } catch (Exception e) {
-            // Note: If running inside Docker container where src/ doesn't exist, this logs gracefully
-            System.err.println("Could not save to src/main/resources/certs (normal inside Docker container): " + e.getMessage());
+            log.warn("Could not save mock certificates to src/main/resources/certs: {}", e.getMessage());
         }
     }
 
     // Endpoint returning the certificate directly
     @GetMapping(value = "/certs", produces = "application/x-x509-ca-cert")
     public ResponseEntity<byte[]> getCertificate() {
+        log.info("Serving mock certificate");
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_TYPE, "application/x-x509-ca-cert")
                 .body(this.cachedCertificateBytes);
