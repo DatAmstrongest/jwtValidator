@@ -1,5 +1,6 @@
 package com.kocmetehan.jwtValidator.response;
 
+// This is the Response Class of the program, it returns a message if JWT is not valid
 public class JWTResponse {
     private boolean valid;
     private String message;

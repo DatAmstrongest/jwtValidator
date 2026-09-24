@@ -27,6 +27,7 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
 
+// This is the mock certificate server that creates private and public keys, saves them and returned them from an endpoint
 @RestController
 @RequestMapping("/api/mock")
 public class CertificateMockController {

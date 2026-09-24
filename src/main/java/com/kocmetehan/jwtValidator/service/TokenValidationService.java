@@ -20,6 +20,7 @@ import java.util.Date;
 
 @Service
 public class TokenValidationService {
+
     private final HttpClient httpClient = HttpClient.newBuilder()
             .connectTimeout(Duration.ofSeconds(3))
             .build();
@@ -68,12 +69,13 @@ public class TokenValidationService {
             Date exp = signedJWT.getJWTClaimsSet().getExpirationTime();
             Date iat = signedJWT.getJWTClaimsSet().getIssueTime();
 
+            // Check if the token is expired or not
             if (exp == null || now.after(exp)) {
                 return new JWTResponse(false, "Token has expired.");
             }
 
-            // Check if the current time is before the issue time (with a 60-second grace window)
-            if (iat == null || now.before(new Date(iat.getTime() - 60_000))) {
+            // Check if the current time is before the issue time
+            if (iat == null || now.before(new Date(iat.getTime()))) {
                 return new JWTResponse(false, "Token issue time (iat) is invalid or in the future.");
             }
 
@@ -84,6 +86,7 @@ public class TokenValidationService {
         }
     }
 
+    // This function gets the certificate from a given URL.
     private X509Certificate fetchCertificate(URI x5u) throws Exception {
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(x5u)

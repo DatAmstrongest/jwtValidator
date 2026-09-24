@@ -41,16 +41,26 @@
 			<scope>test</scope>
 		</dependency>
 
+		<!-- This dependency is used for creating JWT tokens -->
 		<dependency>
 			<groupId>com.nimbusds</groupId>
 			<artifactId>nimbus-jose-jwt</artifactId>
 			<version>10.10</version>
 		</dependency>
 
+		<!-- This dependency is used for creating certificate -->
 		<dependency>
 			<groupId>org.bouncycastle</groupId>
 			<artifactId>bcpkix-jdk18on</artifactId>
 			<version>1.84</version>
+		</dependency>
+
+		<!-- This dependency is for rate limiting -->
+		<dependency>
+			<groupId>com.bucket4j</groupId>
+			<artifactId>bucket4j_jdk17-core</artifactId>
+			<version>8.20.0</version>
+			<scope>compile</scope>
 		</dependency>
 	</dependencies>
 
